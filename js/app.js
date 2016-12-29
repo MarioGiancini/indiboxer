@@ -172,7 +172,7 @@ Item.prototype.update = function() {
             'x' : this.x,
             'y' : this.y
           });
-          document.getElementById("deliveries").innerHTML = player.deliveries.length;
+          document.getElementById("boxes_saved").innerHTML = player.deliveries.length;
           this.collected = false;
           goalReached = true;
           this.ranOver = 0;
@@ -270,21 +270,22 @@ var Player = function(image) {
   this.moveY = 5;
   this.h = 117; // height of player
   this.w = 101; // width of player
-  this.moveSpeed = 8;
+  this.moveSpeed = 5; // edit this to make character move faster, max speed is 10.
   this.moving = false;
   this.movements = [];
   this.deliveries = [];
   this.lives = 3;
+  this.level = 1;
 }
 
 Player.prototype.update = function(dt) {
-  dt = dt.toFixed(2);
+  dt = dt.toFixed(4);
   if(this.moving && !hit) {
-    if(this.x.toFixed(1) > this.moveX.toFixed(1)){
+    if(this.x.toFixed(1) > this.moveX.toFixed(1)) {
       this.x = this.x - (dt * this.moveSpeed);
     } else if(this.x.toFixed(1) < this.moveX.toFixed(1)) {
       this.x = this.x + (dt * this.moveSpeed);
-    } else if(this.y.toFixed(1) > this.moveY.toFixed(1)){
+    } else if(this.y.toFixed(1) > this.moveY.toFixed(1)) {
       this.y = this.y - (dt * this.moveSpeed);
     } else if(this.y.toFixed(1) < this.moveY.toFixed(1)) {
       this.y = this.y + (dt * this.moveSpeed);
@@ -294,8 +295,12 @@ Player.prototype.update = function(dt) {
       this.y = Math.round(this.y);
       console.log('Player X: ', this.x, 'Player Y: ', this.y );
     }
+    // Make sure the player is within grid limits so move animation doesn't glitch
+    this.x = this.x < 0 ? 0 : this.x > 4 ? 4 : this.x;
+    this.y = this.y < 0 ? 0 : this.y > 5 ? 5 : this.y;
   }
   if(hit){
+    // Reduce a life if player has any left or gameover
     if(this.lives > 1) {
       this.lives -= 1;
       this.x = getRandomInt(1, 4);
@@ -464,8 +469,7 @@ var allEnemies = [ new Enemy(1, -1), new Enemy(2, -2), new Enemy(2, -3), new Ene
     heart = new Item('images/heart.png', 'heart');
 
 
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
+// Listen for key presses and sends the keys to Player.handleInput()
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
         37: 'left',

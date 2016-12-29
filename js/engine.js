@@ -209,18 +209,18 @@ var Engine = (function(global) {
      * all of these images are properly loaded our game will start.
      */
     Resources.load([
-        'images/stone-block.png',
-        'images/water-block.png',
-        'images/grass-block.png',
-        'images/enemy-bug.png',
-        'images/char-boy.png',
-        'images/gem-blue.png',
-        'images/gem-green.png',
-        'images/gem-orange.png',
-        'images/heart.png',
-        'images/rock.png',
-        'images/star.png',
-        'images/selector.png'
+      'images/stone-block.png',
+      'images/water-block.png',
+      'images/grass-block.png',
+      'images/enemy-bug.png',
+      'images/char-boy.png',
+      'images/gem-blue.png',
+      'images/gem-green.png',
+      'images/gem-orange.png',
+      'images/heart.png',
+      'images/rock.png',
+      'images/star.png',
+      'images/selector.png'
     ]);
     Resources.onReady(init);
 
