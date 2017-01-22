@@ -1,5 +1,5 @@
-/* Engine.js
- * This file provides the game loop functionality (update entities and render),
+/*
+ * This provides the game loop functionality (update entities and render),
  * draws the initial game board on the screen, and then calls the update and
  * render methods on your player and enemy objects (defined in your app.js).
  *
@@ -69,13 +69,16 @@ var Engine = (function(global) {
 
     // Set the time elapsed
     function updateTimer(lastTime) {
+        var h = addZero(new Date(lastTime).getHours() - new Date(startTime).getHours());
         var m = addZero(new Date(lastTime - startTime).getMinutes());
         var s = addZero(new Date(lastTime - startTime).getSeconds());
         var x = document.getElementById("timer");
-        x.innerHTML = '<span id="minutes">' + m + '<span id="time_colon">:</span>' + '<span id="seconds">' + s + '</span>';
+        x.innerHTML = '<span id="hours">' + h + '<span class="time-colon">:</span>' +
+                      '<span id="minutes">' + m + '<span class="time-colon">:</span>' +
+                      '<span id="seconds">' + s + '</span>';
         gameMinutes = m;
         gameSeconds = s;
-        gameHours = Math.floor(60 / m);
+        gameHours = h;
     }
 
     function addZero(i) {
@@ -199,6 +202,7 @@ var Engine = (function(global) {
           startTime = Date.now();
           boxesLost = [];
           document.getElementById("boxes_lost").innerHTML = boxesLost.length;
+          player = new Player('images/char-boy.png');
         } else {
           start = confirm('Start game?');
         }
