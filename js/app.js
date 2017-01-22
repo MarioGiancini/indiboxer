@@ -8,6 +8,7 @@ var colWidth = 101,
     startTime = new Date(),
     heartX,
     heartY,
+    points = 0,
     gameHours = 0,
     gameMinutes = 0,
     gameSeconds = 0,
@@ -171,6 +172,20 @@ Item.prototype.update = function() {
             'x' : this.x,
             'y' : this.y
           });
+          switch (this.ranOver) {
+            case 0:
+              points += 100;
+              break;
+            case 1:
+              points += 50;
+              break;
+            case 2:
+              points += 25;
+              break;
+            default:
+              break;
+          }
+          document.getElementById("points").innerHTML = points;
           document.getElementById("boxes_saved").innerHTML = player.deliveries.length;
           this.collected = false;
           goalReached = true;
@@ -189,6 +204,7 @@ Item.prototype.update = function() {
         // Gain a life and remove heart from canvas
         this.collected = false;
         player.lives += 1;
+        points += 50;
         document.getElementById("lives").innerHTML = player.lives;
         this.x = 100;
         this.y = 100;
@@ -215,6 +231,8 @@ Item.prototype.update = function() {
           'x' : this.x,
           'y' : this.y
         });
+        points -= 50;
+        document.getElementById("points").innerHTML = points;
         document.getElementById("boxes_lost").innerHTML = boxesLost.length;
         this.sprite = 'images/gem-blue.png';
         this.x = getRandomInt(0, 5);
@@ -307,7 +325,7 @@ Player.prototype.update = function(dt) {
       this.y = Math.round(this.y);
       console.log('Player X: ', this.x, 'Player Y: ', this.y, 'Direction: ', this.moveDirection);
     }
-    
+
   }
   if(hit){
     // Reduce a life if player has any left or gameover
@@ -340,18 +358,37 @@ Player.prototype.update = function(dt) {
 
 Player.prototype.checkLevel = function() {
 
-  if (this.deliveries.length < 10) {
+  if (points < 1000) {
     this.level = 1;
-  } else if (this.deliveries.length < 20) {
+  } else if (points < 2000) {
     this.level = 2;
     this.moveSpeed = 6;
-  } else if (this.deliveries.length < 30) {
+  } else if (points < 3000) {
     this.level = 3;
     this.moveSpeed = 7;
-  } else if (this.deliveries.length < 40) {
+  } else if (points < 4000) {
     this.level = 4;
     this.moveSpeed = 8;
+  } else if (points < 5000) {
+    this.level = 5;
+    this.moveSpeed = 9;
+  } else if (points < 6000) {
+    this.level = 6;
+    this.moveSpeed = 10;
+  } else if (points < 7000) {
+    this.level = 7;
+    this.moveSpeed = 11;
+  } else if (points < 8000) {
+    this.level = 8;
+    this.moveSpeed = 12;
+  } else if (points < 9000) {
+    this.level = 9;
+    this.moveSpeed = 13;
+  } else if (points < 10000) {
+    this.level = 10;
+    this.moveSpeed = 14;
   }
+
   document.getElementById("level").innerHTML = this.level;
 }
 

@@ -203,6 +203,11 @@ var Engine = (function(global) {
           boxesLost = [];
           document.getElementById("boxes_lost").innerHTML = boxesLost.length;
           player = new Player('images/char-boy.png');
+          box = new Item('images/gem-blue.png', 'indiebox'),
+          points = 0;
+          collected = false;
+          document.getElementById("points").innerHTML = points;
+          updateTimer();
         } else {
           start = confirm('Start game?');
         }
