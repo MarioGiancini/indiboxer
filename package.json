@@ -1,0 +1,27 @@
+{
+  "name": "indieboxer",
+  "version": "1.0.0",
+  "description": "A game where you have to save as many IndieBoxes as you cane before they get run over by delievery trucks.",
+  "main": "gulpfile.js",
+  "dependencies": {},
+  "devDependencies": {
+    "browser-sync": "^2.18.6",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-sass": "^3.1.0"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarioGiancini/indiboxer.git"
+  },
+  "keywords": [
+    "game",
+    "javascript"
+  ],
+  "author": "Mario Giancini",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MarioGiancini/indiboxer/issues"
+  },
+  "homepage": "https://github.com/MarioGiancini/indiboxer#readme"
+}
