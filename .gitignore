@@ -1,0 +1,4 @@
+# Node Package Manager
+node_modules
+
+.DS_Store
