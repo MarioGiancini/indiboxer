@@ -32,11 +32,8 @@ var boardLanes = [new GoalLane, new EnemyLane(), new EnemyLane(), new EnemyLane(
 
 // Enemies our player must avoid
 var Enemy = function(speed, respawn) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
 
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
+    // image url
     this.sprite = 'images/enemy-bug.png';
 
     // Integer for how fast the enemy travels, max speed 3
@@ -61,7 +58,7 @@ var Enemy = function(speed, respawn) {
 
 };
 
-// Update the enemy's position, required method for game
+// Update the enemy's position
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
     // Move the enemy across the row
@@ -104,16 +101,17 @@ Enemy.prototype.update = function(dt) {
     hit = true;
   }
 
+  // If an enemy hits a box, increment how many times it was hit
   if(this.y === box.y && this.hitBox === false) {
     if( this.x > (box.x - .5) && this.x < (box.x + .5) ) {
       this.hitBox = true;
       box.ranOver += 1;
-      console.log('Item ran over!');
+      console.log('Box ran over!');
     }
   }
 };
 
-// Draw the enemy on the screen, required method for game
+// Draws an enemy on the screen
 Enemy.prototype.render = function() {
   ctx.drawImage(Resources.get(this.sprite), this.x * colWidth, this.y * rowHeight - offsetY);
 };
@@ -137,6 +135,7 @@ var Item = function(image, type) {
   this.ranOver = 0; // if the item gets hit by an enemy
 }
 
+// Draws an Item on the screen
 Item.prototype.render = function() {
   ctx.drawImage(Resources.get(this.sprite), this.x * colWidth, this.y * rowHeight - offsetY);
 }
@@ -147,7 +146,7 @@ Item.prototype.update = function() {
   var prevY = this.y;
 
   // If the player is hit while indiebox item is collected
-  // set it back on a random location.
+  // set the item back on a random location.
   if(hit && this.collected && this.type === 'indiebox') {
     this.collected = false;
     this.x = getRandomInt(0, 5);
@@ -195,7 +194,7 @@ Item.prototype.update = function() {
         this.y = 100;
         break;
       default:
-        //
+        break;
     }
   }
 
@@ -251,7 +250,7 @@ var Goal = function(image) {
 
 Goal.prototype.update = function() {
   if(goalReached) {
-    console.log('Goal Reached!');
+    console.log('Box Delivered!');
     goalReached = false;
     this.x = getRandomInt(0, 5);
   }
@@ -261,13 +260,15 @@ Goal.prototype.render = function() {
   ctx.drawImage(Resources.get(this.sprite), this.x * colWidth, this.y * rowHeight - offsetY);
 }
 
+// Create player class
 var Player = function(image) {
   // Setup url for player sprit
   this.sprite = image;
   this.x = 2;
   this.y = 5;
-  this.moveX = 2;
-  this.moveY = 5;
+  this.moveX = 2; // the next X movement
+  this.moveY = 5; // the next Y movement
+  this.moveDirection = ''; // the movement direction from user input
   this.h = 117; // height of player
   this.w = 101; // width of player
   this.moveSpeed = 5; // edit this to make character move faster, max speed is 10.
@@ -279,25 +280,34 @@ var Player = function(image) {
 }
 
 Player.prototype.update = function(dt) {
-  dt = dt.toFixed(4);
+  // Check difference of move destination and ensure direction max before changing
+  // board coordinates to avoid gitter in movement.
   if(this.moving && !hit) {
-    if(this.x.toFixed(1) > this.moveX.toFixed(1)) {
-      this.x = this.x - (dt * this.moveSpeed);
-    } else if(this.x.toFixed(1) < this.moveX.toFixed(1)) {
-      this.x = this.x + (dt * this.moveSpeed);
-    } else if(this.y.toFixed(1) > this.moveY.toFixed(1)) {
-      this.y = this.y - (dt * this.moveSpeed);
-    } else if(this.y.toFixed(1) < this.moveY.toFixed(1)) {
-      this.y = this.y + (dt * this.moveSpeed);
+    // Moving left
+    if(this.x > this.moveX && this.moveDirection === 'left') {
+      newX = this.x - (dt * this.moveSpeed);
+      this.x = newX < this.moveX ? this.moveX : newX;
+    // Moving right
+    } else if(this.x < this.moveX && this.moveDirection === 'right') {
+      newX = this.x + (dt * this.moveSpeed);
+      this.x = newX > this.moveX ? this.moveX : newX;
+    // Moving up
+    } else if(this.y > this.moveY && this.moveDirection === 'up') {
+      newY = this.y - (dt * this.moveSpeed);
+      this.y = newY < this.moveY ? this.moveY : newY;
+    // Moving down
+    } else if(this.y < this.moveY && this.moveDirection === 'down') {
+      newY = this.y + (dt * this.moveSpeed);
+      this.y = newY > this.moveY ? this.moveY : newY;
+    // Not moving
     } else {
       this.moving = false;
+      // Insure integer values
       this.x = Math.round(this.x);
       this.y = Math.round(this.y);
-      console.log('Player X: ', this.x, 'Player Y: ', this.y );
+      console.log('Player X: ', this.x, 'Player Y: ', this.y, 'Direction: ', this.moveDirection);
     }
-    // Make sure the player is within grid limits so move animation doesn't glitch
-    this.x = this.x < 0 ? 0 : this.x > 4 ? 4 : this.x;
-    this.y = this.y < 0 ? 0 : this.y > 5 ? 5 : this.y;
+    
   }
   if(hit){
     // Reduce a life if player has any left or gameover
@@ -325,7 +335,24 @@ Player.prototype.update = function(dt) {
       box.y = getRandomInt(1, 4);
     }
   }
+  this.checkLevel();
+}
 
+Player.prototype.checkLevel = function() {
+
+  if (this.deliveries.length < 10) {
+    this.level = 1;
+  } else if (this.deliveries.length < 20) {
+    this.level = 2;
+    this.moveSpeed = 6;
+  } else if (this.deliveries.length < 30) {
+    this.level = 3;
+    this.moveSpeed = 7;
+  } else if (this.deliveries.length < 40) {
+    this.level = 4;
+    this.moveSpeed = 8;
+  }
+  document.getElementById("level").innerHTML = this.level;
 }
 
 // Draw the player on the canvas
@@ -354,8 +381,9 @@ Player.prototype.collects = function(item) {
   }
 }
 
+// Check if the player delivers a box
 Player.prototype.reachesGoal = function(item) {
-  if(item.x === goal.x && item.y === goal.y){
+  if(item.x === goal.x && item.y === goal.y) {
     return true;
   } else {
     return false;
@@ -378,6 +406,7 @@ Player.prototype.handleInput = function(keyCode) {
         }
       });
       if(!obstructed && this.x > 0 && !this.moving) {
+        this.moveDirection = 'left';
         this.moving = true;
         this.moveX -= 1;
         // If player moved log it
@@ -398,6 +427,7 @@ Player.prototype.handleInput = function(keyCode) {
         }
       });
       if(!obstructed && this.y > 0 && !this.moving) {
+        this.moveDirection = 'up';
         this.moving = true;
         this.moveY -= 1;
         this.movements.push({
@@ -417,6 +447,7 @@ Player.prototype.handleInput = function(keyCode) {
         }
       });
       if(!obstructed && this.x < 4 && !this.moving) {
+        this.moveDirection = 'right';
         this.moving = true;
         this.moveX += 1;
         this.movements.push({
@@ -436,6 +467,7 @@ Player.prototype.handleInput = function(keyCode) {
         }
       });
       if(!obstructed && this.y < 5 && !this.moving) {
+        this.moveDirection = 'down';
         this.moving = true;
         this.moveY += 1;
         this.movements.push({
