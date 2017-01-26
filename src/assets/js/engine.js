@@ -69,16 +69,14 @@ var Engine = (function() {
 
     // Set the time elapsed
     function updateTimer(lastTime) {
-        var h = addZero(new Date(lastTime).getHours() - new Date(startTime).getHours());
-        var m = addZero(new Date(lastTime - startTime).getMinutes());
-        var s = addZero(new Date(lastTime - startTime).getSeconds());
-        var x = document.getElementById("timer");
-        x.innerHTML = '<span id="hours">' + h + '<span class="time-colon">:</span>' +
-                      '<span id="minutes">' + m + '<span class="time-colon">:</span>' +
-                      '<span id="seconds">' + s + '</span>';
-        gameMinutes = m;
-        gameSeconds = s;
-        gameHours = h;
+      var x = document.getElementById("timer");
+      gameSeconds = new Date(lastTime - startTime).getSeconds();
+      gameMinutes = new Date(lastTime - startTime).getMinutes();
+      gameHours = gameMinutes % 60 ? gameHours : gameHours++;
+
+      x.innerHTML = '<span id="hours">' + addZero(gameHours) + '<span class="time-colon">:</span>' +
+                    '<span id="minutes">' + addZero(gameMinutes) + '<span class="time-colon">:</span>' +
+                    '<span id="seconds">' + addZero(gameSeconds) + '</span>';
     }
 
     function addZero(i) {
@@ -231,7 +229,7 @@ var Engine = (function() {
       'assets/img/star.png',
       'assets/img/selector.png'
     ]);
-    
+
     window.Resources.onReady(init);
 
 })(this);

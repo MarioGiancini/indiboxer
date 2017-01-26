@@ -2,7 +2,7 @@
  * This is simply an image loading utility. It eases the process of loading
  * image files so that they can be used within your game. It also includes
  * a simple "caching" layer so it will reuse cached images if you attempt
- * to load the same image multiple times. 
+ * to load the same image multiple times.
  */
 (function() {
     var resourceCache = {};
@@ -138,4 +138,18 @@ function getRandomIntExclude(min, max, exclude) {
     }
   }
   return random;
+}
+
+// Returns a random integer excluding a passed number
+function getRandomIntExcludeMultiple(min, max, excludeArray) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  var randomArray = []
+  // If the random number equals a number in excludeArray add don't include in random array
+  for(i = min; i <= max; i++) {
+    if(excludeArray.indexOf(i) === -1){
+      randomArray.push(i);
+    }
+  }
+  return randomArray[getRandomInt(0, randomArray.length)];
 }

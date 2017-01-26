@@ -17,9 +17,8 @@ var ctx = $('canvas')[0].getContext('2d'),
 
 
 var EnemyLane = function() {
+  // Set up arry for enemies in that lane
   this.enemies = [];
-  this.speed = 0;
-  this.hasItem = false;
 }
 
 var GoalLane = function() {
@@ -31,24 +30,25 @@ var StartLane = function() {
 }
 
 var boardLanes = [new GoalLane, new EnemyLane(), new EnemyLane(), new EnemyLane(), new StartLane(), new StartLane()];
+var enemyQueueLanes = [new EnemyLane(), new EnemyLane(), new EnemyLane()];
 
 // Enemies our player must avoid
-var Enemy = function(speed, respawn) {
+var Enemy = function(speed, sprite) {
 
     // image url
-    this.sprite = 'assets/img/enemy-bug.png';
+    this.sprite = sprite;
 
     // Integer for how fast the enemy travels, max speed 3
     this.speed = speed;
-
-    // Respawn X value so enemies spawn on each other
-    this.respawn = respawn;
 
     // Start the enemy randomly off the board a ways
     this.x = -getRandomInt(1, 8);
 
     // Select a random row between the second and forth
     this.y = getRandomInt(1, 4);
+
+    // Marker to track lane position
+    this.prevX = null;
 
     // set when the enemy is visable
     this.visable = false;
@@ -58,6 +58,12 @@ var Enemy = function(speed, respawn) {
 
     this.laneOrder = 0;
 
+    // Setup position in enemyQueueLanes
+    enemyQueueLanes[this.y - 1].enemies.splice(-this.x , 0, -this.x);
+
+    console.log('Enemy Lane ' + this.y + ' length: ' + enemyQueueLanes[this.y - 1].enemies.length);
+    // Update test viever
+    $('#enemy_lane_' + this.y).text(enemyQueueLanes[this.y - 1].enemies.length);
 };
 
 // Update the enemy's position
@@ -69,14 +75,29 @@ Enemy.prototype.update = function(dt) {
     // If the enemy x is greater than zero it's visable
     if(this.x > 0 && this.visable === false) {
       this.visable = true;
+      // remove from enemyQueueLanes
+      enemyQueueLanes[this.y - 1].enemies.splice(Math.floor(this.x), 1);
+      // add to boardLanes
+      boardLanes[this.y].enemies.splice(this.x, 0, this.x);
+
+      // Update test viever
+      $('#enemy_lane_' + this.y).text(enemyQueueLanes[this.y - 1].enemies.length);
+      console.log('Enemy Y: ', this.y);
     } else if(this.x >= 5 && this.visable === true) {
       // If the enemy x is greater than 5 is not visable on the board
       // Redraw enemy off canvas and set visable to false
       this.visable = false;
-      this.x = this.respawn;
       this.y = getRandomInt(1, 4);
+      // Get a new x value to start off board that isn't already taken in that lane.
+      this.x = -getRandomIntExcludeMultiple(1, 5, enemyQueueLanes[this.y - 1].enemies);
+      this.prevX =  this.x;
       this.speed = getRandomInt(1, 4);
       this.hitBox = false;
+      // remove from boardLanes and put back into enemyQueueLanes
+      boardLanes[this.y].enemies.splice(this.laneOrder, 1);
+      enemyQueueLanes[this.y - 1].enemies.splice(-this.x , 0, -this.x);
+      console.log('Enemy Lane ' + this.y + ' length: ' + enemyQueueLanes[this.y - 1].enemies.length);
+      $('#enemy_lane_' + this.y).text(enemyQueueLanes[this.y - 1].enemies.length);
     } else {
       // Have enemies stop right behind an enemy if they are going faster than
       // the one ahead of them.
@@ -85,10 +106,22 @@ Enemy.prototype.update = function(dt) {
       var enemySpeed = this.speed;
       var newSpeed = 0;
 
+      // Update enemy's position in the enemyQueueLane
+      if( !this.visable && Math.floor(enemyX) > this.prevX) {
+        console.log('original enemyX: ' + enemyX);
+        enemyX = Math.floor(enemyX) < 0 ? -Math.floor(enemyX) : Math.floor(enemyX);
+        console.log('prevX: ' + this.prevX, 'enemyX: ' + enemyX);
+        enemyQueueLanes[this.y - 1].enemies.splice(this.prevX, 1); // remove previous lane postion
+        enemyQueueLanes[this.y - 1].enemies.splice(Math.round(enemyX), 0, Math.round(enemyX)); // new position
+        this.prevX = enemyX; // set new prevX to track position
+      }
+      // Loop through all enemies in a lane. If they're speed is greater than one infront of them
+      // match their speeds once they are 1 space away.
       allEnemies.forEach(function(enemy) {
         if(enemy.y === enemyY) {
           if(enemyX <= (enemy.x + 1) && enemy.speed < enemySpeed) {
             newSpeed = enemy.speed;
+            // console.log('Enemy at Y: ' + enemyY + ', X: ' + enemyX + ' changed speed.');
           }
         }
       });
@@ -531,7 +564,11 @@ Rock.prototype.render = function() {
 }
 
 // Instantiate game objects
-var allEnemies = [ new Enemy(1, -1), new Enemy(2, -2), new Enemy(2, -3), new Enemy(4, -4), new Enemy(4, -5)],
+var allEnemies = [ new Enemy(1, 'assets/img/enemy-bug.png'),
+                new Enemy(2, 'assets/img/enemy-bug.png'),
+                new Enemy(2, 'assets/img/enemy-bug.png'),
+                new Enemy(4, 'assets/img/enemy-bug.png'),
+                new Enemy(4, 'assets/img/enemy-bug.png')],
     allRocks = [new Rock('assets/img/rock.png')],
     player = new Player('assets/img/char-boy.png'),
     box = new Item('assets/img/gem-blue.png', 'indiebox'),
